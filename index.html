@@ -1,0 +1,1018 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MTE-SLAM | Paper Homepage</title>
+    <meta
+      name="description"
+      content="MTE-SLAM: Multi-Tier Feature Fusion for Efficient Neural Semantic SLAM. Single-page paper homepage."
+    />
+    <style>
+      :root {
+        --bg: #ffffff;
+        --bg-soft: #f5f8ff;
+        --surface: rgba(255, 255, 255, 0.92);
+        --surface-strong: #f8fbff;
+        --line: rgba(42, 95, 186, 0.18);
+        --text: #0f172a;
+        --muted: #475467;
+        --blue: #58a7ff;
+        --cyan: #4de8d5;
+        --gold: #f6d288;
+        --shadow: 0 14px 36px rgba(16, 24, 40, 0.12);
+        --radius-xl: 24px;
+        --radius-lg: 18px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Avenir Next", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        color: var(--text);
+        background: #ffffff;
+        line-height: 1.7;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: none;
+      }
+
+      .container {
+        width: min(1200px, calc(100vw - 40px));
+        margin: 0 auto;
+      }
+
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.86);
+        border-bottom: 1px solid rgba(42, 95, 186, 0.14);
+      }
+
+      .nav-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 0;
+      }
+
+      .logo {
+        letter-spacing: 0.08em;
+        font-size: 0.84rem;
+        color: var(--muted);
+      }
+
+      .menu {
+        display: flex;
+        gap: 16px;
+      }
+
+      .menu a {
+        text-decoration: none;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .menu a:hover {
+        color: var(--blue);
+      }
+
+      .hero {
+        padding: clamp(28px, 5vw, 72px) 0 clamp(20px, 3vw, 34px);
+      }
+
+      .hero-top {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(180px, 28vw);
+        gap: clamp(10px, 2vw, 16px);
+        align-items: center;
+      }
+
+      .hero-sketch {
+        width: 100%;
+        border-radius: 14px;
+        background: #ffffff;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 12px;
+        border-radius: 999px;
+        background: rgba(59, 130, 246, 0.14);
+        border: 1px solid rgba(59, 130, 246, 0.42);
+        color: #1d4ed8;
+        font-weight: 700;
+        font-size: 0.82rem;
+      }
+
+      .pill-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .hero-logo {
+        margin-top: 8px;
+        text-align: center;
+      }
+
+      .hero-logo img {
+        width: clamp(480px, 88vw, 880px);
+        height: auto;
+        display: inline-block;
+      }
+
+      h1 {
+        margin: 18px 0 14px;
+        font-size: clamp(1.55rem, 4.2vw, 3.85rem);
+        line-height: 1.11;
+        letter-spacing: -0.03em;
+        max-width: min(960px, 100%);
+      }
+
+      .subtitle {
+        margin: 0;
+        max-width: 860px;
+        color: var(--muted);
+        font-size: clamp(1rem, 2vw, 1.15rem);
+      }
+
+      .meta {
+        margin-top: 16px;
+        color: #344054;
+        font-size: clamp(0.92rem, 1.35vw, 1.08rem);
+        letter-spacing: 0.02em;
+        line-height: 1.9;
+        text-align: center;
+      }
+
+      .authors-line {
+        display: block;
+        word-spacing: 0.35em;
+      }
+
+      .school-line {
+        display: block;
+      }
+
+      .hero-video {
+        margin-top: 12px;
+        text-align: center;
+      }
+
+      .hero-video video {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        border-radius: 14px;
+        background: #ffffff;
+        display: block;
+        margin: 0 auto;
+      }
+
+      .overview-caption {
+        margin-top: 2px;
+        color: var(--muted);
+        font-size: 0.95rem;
+        text-align: center;
+      }
+
+      .actions {
+        margin-top: 24px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 16px;
+        border-radius: 10px;
+        border: 1px solid #d0d5dd;
+        color: var(--text);
+        text-decoration: none;
+        font-weight: 600;
+        background: #f8fafc;
+        transition: transform 0.24s ease, border-color 0.24s ease;
+        min-width: 98px;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        border-color: rgba(88, 167, 255, 0.75);
+      }
+
+      .actions .btn.primary {
+        background: #f8fafc;
+        color: var(--text);
+        border: 1px solid #d0d5dd;
+      }
+
+      .btn .icon {
+        margin-right: 8px;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .btn .icon svg {
+        width: 16px;
+        height: 16px;
+        display: block;
+      }
+
+      .section {
+        margin-top: clamp(18px, 3vw, 28px);
+        padding-top: clamp(14px, 2.2vw, 22px);
+        border-top: 1px solid var(--line);
+      }
+
+      .panel {
+        border: none;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .overview {
+        padding: clamp(10px, 2.6vw, 26px);
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      h2 {
+        margin: 0 0 12px;
+        font-size: 1.25rem;
+      }
+
+      .section-title {
+        text-align: center;
+        font-size: clamp(1.6rem, 3.2vw, 2.2rem);
+        letter-spacing: 0.01em;
+        margin-bottom: 16px;
+      }
+
+      .text {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .highlight {
+        border: 1px solid rgba(246, 210, 136, 0.35);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        background: linear-gradient(180deg, rgba(246, 210, 136, 0.09), rgba(246, 210, 136, 0.02));
+      }
+
+      .results {
+        padding: 22px;
+      }
+
+      .result-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .result-card {
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(164, 193, 255, 0.22);
+        background: #f8fbff;
+        padding: 16px;
+      }
+
+      .result-card h3 {
+        margin: 0 0 8px;
+        font-size: 1rem;
+      }
+
+      .result-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .methods {
+        padding: clamp(10px, 2.2vw, 22px);
+      }
+
+      .overview-media {
+        margin: 2px 0 0;
+      }
+
+      .overview-media img {
+        width: 100%;
+        border-radius: 14px;
+        background: #0b1220;
+      }
+
+      .exp-layout {
+        display: grid;
+        grid-template-columns: 1.25fr 1fr;
+        gap: 12px;
+        align-items: start;
+        margin: 10px 0 18px;
+      }
+
+      .exp-figure {
+        margin: 0;
+        padding: 0;
+      }
+
+      .exp-figure img {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        display: block;
+      }
+
+      .exp-figure figcaption {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 0.82rem;
+        text-align: center;
+      }
+
+      .table-pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin: 10px 0 12px;
+        align-items: stretch;
+      }
+
+      .table-pair .table-wrap {
+        display: flex;
+      }
+
+      .table-pair table {
+        height: 100%;
+      }
+
+      .semantic-miou-table th:first-child,
+      .semantic-miou-table td:first-child {
+        min-width: 170px;
+        white-space: nowrap;
+      }
+
+      .image-pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin: 8px 0 18px;
+      }
+
+      .image-pair .exp-figure img {
+        object-fit: cover;
+      }
+
+      .method-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+        gap: 12px;
+      }
+
+      .card {
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(164, 193, 255, 0.22);
+        background: #f8fbff;
+        padding: 16px;
+      }
+
+      .card h3 {
+        margin: 0 0 8px;
+        font-size: 1.02rem;
+      }
+
+      .recon-figure {
+        overflow: hidden;
+        border-radius: 10px;
+      }
+
+      .recon-figure img {
+        transform: scale(1.01);
+        transform-origin: center;
+      }
+
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.94rem;
+      }
+
+      .comparison {
+        padding: 22px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: clamp(0.82rem, 1.2vw, 0.92rem);
+      }
+
+      th,
+      td {
+        padding: 10px 8px;
+        text-align: left;
+        border-bottom: 1px solid rgba(164, 193, 255, 0.16);
+      }
+
+      th {
+        color: #1f2937;
+      }
+
+      td {
+        color: var(--muted);
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        width: 100%;
+      }
+
+      .foot {
+        margin: 28px 0 42px;
+        padding: 16px;
+        text-align: center;
+        color: #667085;
+        font-size: 0.85rem;
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: rise 0.7s ease forwards;
+      }
+
+      .reveal:nth-child(2) {
+        animation-delay: 0.12s;
+      }
+
+      .reveal:nth-child(3) {
+        animation-delay: 0.24s;
+      }
+
+      .reveal:nth-child(4) {
+        animation-delay: 0.36s;
+      }
+
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 1024px) {
+        .container {
+          width: min(1200px, calc(100vw - 28px));
+        }
+
+        .hero-top {
+          grid-template-columns: 1fr 240px;
+        }
+      }
+
+      @media (max-width: 980px) {
+        .overview {
+          grid-template-columns: 1fr;
+        }
+
+        .result-grid {
+          grid-template-columns: 1fr;
+        }
+        .exp-layout {
+          grid-template-columns: 1fr;
+        }
+        .table-pair,
+        .image-pair {
+          grid-template-columns: 1fr;
+        }
+        .hero-top {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 680px) {
+        .container {
+          width: min(1200px, calc(100vw - 20px));
+        }
+
+        .menu {
+          display: none;
+        }
+
+        .hero {
+          padding-top: 56px;
+        }
+
+        .actions {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .method-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .pill-row {
+          gap: 6px;
+        }
+
+        .pill {
+          font-size: 0.76rem;
+          padding: 4px 10px;
+        }
+
+        th,
+        td {
+          font-size: 0.86rem;
+        }
+
+      }
+    </style>
+  </head>
+  <body>
+    <header class="nav">
+      <div class="container nav-inner">
+        <div class="logo">ICRA 2026 | PROJECT PAGE</div>
+        <nav class="menu">
+          <a href="#overview">Overview</a>
+          <a href="#method">Method</a>
+          <a href="#results">Results</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="hero reveal">
+        <div class="hero-top">
+          <div>
+            <div class="pill-row">
+              <div class="pill">Neural Semantic SLAM</div>
+              <div class="pill">RGB-D Mapping</div>
+              <div class="pill">Semantic Reconstruction</div>
+            </div>
+            <h1>MTE-SLAM: Multi-Tier Feature Fusion for Efficient Neural Semantic SLAM</h1>
+          </div>
+          <img class="hero-sketch" src="./images/简笔画.png" alt="Sketch illustration for the project" />
+        </div>
+        <p class="meta">
+          <span class="authors-line">Danqi Lu, Changxin Huang, Zhuangzhuang Chen, Zhiliang Lin, Dachong Li, Yanbin Chang, Jianqiang Li*</span>
+          <span class="school-line">School of Artificial Intelligence, Shenzhen University</span>
+        </p>
+        <div class="hero-logo">
+          <img src="./images/标志.png" alt="Institutional logo" />
+        </div>
+        <div class="hero-video">
+          <video controls preload="metadata" src="./images/视频.mp4"></video>
+        </div>
+        <div class="actions">
+          <a class="btn primary" href="./ICRA2026-03051300.pdf" target="_blank" rel="noopener"
+            ><span class="icon" aria-hidden="true"
+              ><svg viewBox="0 0 24 24" fill="none">
+                <rect x="1.5" y="4.5" width="21" height="15" rx="3.5" stroke="#9CA3AF" stroke-width="1.5"></rect>
+                <text x="12" y="15" text-anchor="middle" font-size="8" font-weight="700" fill="#111827">arXiv</text>
+              </svg></span
+            >Paper</a
+          >
+          <a class="btn" href="#overview"
+            ><span class="icon" aria-hidden="true"
+              ><svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.2c-3.34.73-4.04-1.6-4.04-1.6-.55-1.37-1.33-1.73-1.33-1.73-1.09-.73.08-.71.08-.71 1.2.09 1.83 1.2 1.83 1.2 1.07 1.8 2.8 1.28 3.48.98.11-.76.42-1.28.77-1.58-2.66-.3-5.46-1.31-5.46-5.81 0-1.28.46-2.33 1.21-3.15-.12-.3-.52-1.52.12-3.17 0 0 .99-.31 3.24 1.2a11.45 11.45 0 0 1 5.9 0c2.25-1.51 3.24-1.2 3.24-1.2.64 1.65.24 2.87.12 3.17.75.82 1.21 1.87 1.21 3.15 0 4.51-2.8 5.5-5.47 5.8.43.37.81 1.09.81 2.21v3.28c0 .32.22.69.83.58A12 12 0 0 0 12 .5Z"
+                ></path>
+              </svg></span
+            >Code</a
+          >
+        </div>
+      </section>
+
+      <section id="overview" class="section panel overview reveal">
+        <div>
+          <h2 class="section-title">Overview</h2>
+          <p class="text">
+            Existing semantic neural implicit SLAM systems often underutilize semantic cues. Most methods either inject semantics
+            through simple coloring or perform shallow one-stage fusion, which frequently causes blurred object boundaries,
+            fragmented small structures, and weaker local consistency under clutter or occlusion.
+          </p>
+          <p class="text" style="margin-top: 10px">
+            MTE-SLAM addresses this by jointly designing a global-to-local semantic fusion pipeline and an adaptive redundancy
+            suppression mechanism. The global branch models scene-level context, the local branch enforces neighborhood continuity,
+            and the suppressor removes low-value semantic features over time. This combination improves semantic detail quality while
+            keeping mapping and optimization efficient for practical per-frame processing.
+          </p>
+        </div>
+        <figure class="overview-media" style="grid-column: 1 / -1">
+          <img src="./images/流程图.png" alt="MTE-SLAM overall framework and module design" />
+          <figcaption class="overview-caption">
+            The framework jointly optimizes RGB, depth, and semantic objectives over a neural implicit scene representation.
+            MTFF enhances semantics through global context and local continuity modeling, while FRS dynamically suppresses redundant
+            feature channels to improve efficiency without sacrificing semantic fidelity.
+          </figcaption>
+        </figure>
+      </section>
+
+      <section id="method" class="section panel methods reveal">
+        <h2 class="section-title">Method</h2>
+        <p class="text" style="margin-bottom: 12px">
+          MTE-SLAM couples coarse-to-fine neural rendering with semantic-aware feature optimization. The system jointly supervises
+          RGB, depth, and semantic consistency, while injecting global context and local continuity constraints into semantic fusion.
+        </p>
+        <div class="method-grid">
+          <article class="card">
+            <h3>MTFF: Multi-Tier Feature Fusion</h3>
+            <p>
+              MTFF performs hierarchical semantic aggregation in two stages. The global context branch models long-range scene
+              dependencies to stabilize category-level consistency, while the local continuity branch strengthens neighborhood-level
+              boundary alignment. Their collaborative fusion improves small-object integrity, edge sharpness, and regional coherence
+              under occlusion and fast viewpoint changes.
+            </p>
+          </article>
+          <article class="card">
+            <h3>FRS: Feature Redundancy Suppressor</h3>
+            <p>
+              FRS adaptively suppresses low-value semantic channels based on feature importance and temporal variation. Instead of
+              uniformly keeping all activations, it retains only informative components for mapping updates, reducing redundant
+              computation and memory cost. This keeps semantic expressiveness while significantly improving frame-wise efficiency.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section id="results" class="section panel comparison reveal">
+        <h2 class="section-title">Results</h2>
+        <h3>1. Tracking ATE RMSE (cm) - Replica</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>room0</th>
+                <th>room1</th>
+                <th>room2</th>
+                <th>office0</th>
+                <th>office1</th>
+                <th>office2</th>
+                <th>office3</th>
+                <th>office4</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>ESLAM</td>
+                <td>0.71</td>
+                <td>0.70</td>
+                <td>0.52</td>
+                <td>0.57</td>
+                <td>0.55</td>
+                <td>0.58</td>
+                <td>0.72</td>
+                <td>0.63</td>
+              </tr>
+              <tr>
+                <td>SNI-SLAM</td>
+                <td>0.50</td>
+                <td>0.55</td>
+                <td>0.45</td>
+                <td>0.33</td>
+                <td>0.41</td>
+                <td>0.32</td>
+                <td>0.62</td>
+                <td>0.47</td>
+              </tr>
+              <tr>
+                <td>MTE-SLAM (Ours)</td>
+                <td>0.55</td>
+                <td>0.44</td>
+                <td>0.43</td>
+                <td>0.36</td>
+                <td>0.39</td>
+                <td>0.34</td>
+                <td>0.59</td>
+                <td>0.45</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Tracking ATE RMSE (cm) - ScanNet</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>0000</th>
+                <th>0059</th>
+                <th>0106</th>
+                <th>0207</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>NICE-SLAM</td>
+                <td>8.64</td>
+                <td>12.25</td>
+                <td>8.09</td>
+                <td>5.59</td>
+              </tr>
+              <tr>
+                <td>Co-SLAM</td>
+                <td>7.13</td>
+                <td>11.14</td>
+                <td>9.36</td>
+                <td>7.14</td>
+              </tr>
+              <tr>
+                <td>QQ-SLAM</td>
+                <td>6.99</td>
+                <td>9.47</td>
+                <td>8.22</td>
+                <td>8.49</td>
+              </tr>
+              <tr>
+                <td>ESLAM</td>
+                <td>7.30</td>
+                <td>8.50</td>
+                <td>7.50</td>
+                <td>5.70</td>
+              </tr>
+              <tr>
+                <td>SNI-SLAM</td>
+                <td>6.90</td>
+                <td>7.38</td>
+                <td>7.19</td>
+                <td>4.70</td>
+              </tr>
+              <tr>
+                <td>MTE-SLAM (Ours)</td>
+                <td>8.50</td>
+                <td>7.10</td>
+                <td>6.84</td>
+                <td>4.53</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <figure class="exp-figure" style="margin-top: 10px; margin-bottom: 18px">
+          <img src="./images/轨迹.png" alt="Qualitative tracking trajectories on Replica and ScanNet" />
+          <figcaption>Qualitative tracking comparison (Replica and ScanNet).</figcaption>
+        </figure>
+
+        <h3>2. Reconstruction - Replica</h3>
+        <div class="exp-layout">
+          <div class="table-wrap">
+            <table class="semantic-miou-table">
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Depth L1 (cm) ↓</th>
+                  <th>Acc. (cm) ↓</th>
+                  <th>Comp. (cm) ↓</th>
+                  <th>Comp. Ratio (%) ↑</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>NICE-SLAM</td>
+                  <td>3.53</td>
+                  <td>2.85</td>
+                  <td>3.00</td>
+                  <td>89.33</td>
+                </tr>
+                <tr>
+                  <td>Co-SLAM</td>
+                  <td>1.62</td>
+                  <td>2.10</td>
+                  <td>2.08</td>
+                  <td>93.44</td>
+                </tr>
+                <tr>
+                  <td>ESLAM</td>
+                  <td>1.18</td>
+                  <td>0.97</td>
+                  <td>1.05</td>
+                  <td>98.60</td>
+                </tr>
+                <tr>
+                  <td>SNI-SLAM</td>
+                  <td>0.77</td>
+                  <td>1.94</td>
+                  <td>1.69</td>
+                  <td>96.62</td>
+                </tr>
+                <tr>
+                  <td>MTE-SLAM (Ours)</td>
+                  <td>0.16</td>
+                  <td>1.06</td>
+                  <td>0.99</td>
+                  <td>99.23</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <figure class="exp-figure recon-figure">
+            <img src="./images/几何重建.png" alt="Qualitative reconstruction comparison in room0 and office2" />
+            <figcaption>Qualitative RGB reconstruction comparison on Replica scenes.</figcaption>
+          </figure>
+        </div>
+
+        <h3>3. Semantic mIoU (%) and Runtime (s/frame)</h3>
+        <div class="table-pair">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>room0</th>
+                  <th>room1</th>
+                  <th>room2</th>
+                  <th>office0</th>
+                  <th>office1</th>
+                  <th>office2</th>
+                  <th>office3</th>
+                  <th>office4</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>DNS-SLAM</td>
+                  <td>88.32</td>
+                  <td>84.90</td>
+                  <td>81.20</td>
+                  <td>84.66</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                </tr>
+                <tr>
+                  <td>SNI-SLAM</td>
+                  <td>88.42</td>
+                  <td>87.43</td>
+                  <td>86.16</td>
+                  <td>87.63</td>
+                  <td>78.63</td>
+                  <td>86.49</td>
+                  <td>74.01</td>
+                  <td>80.22</td>
+                </tr>
+                <tr>
+                  <td>MTE-SLAM (Ours)</td>
+                  <td>86.75</td>
+                  <td>88.85</td>
+                  <td>86.31</td>
+                  <td>86.40</td>
+                  <td>90.21</td>
+                  <td>84.77</td>
+                  <td>81.40</td>
+                  <td>80.46</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Track FPT (s) ↓</th>
+                  <th>Map FPT (s) ↓</th>
+                  <th>SLAM FPT (s) ↓</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>vMAP</td>
+                  <td>0.15</td>
+                  <td>1.72</td>
+                  <td>1.66</td>
+                </tr>
+                <tr>
+                  <td>DNS-SLAM</td>
+                  <td>0.36</td>
+                  <td>7.58</td>
+                  <td>7.99</td>
+                </tr>
+                <tr>
+                  <td>SNI-SLAM</td>
+                  <td>0.06</td>
+                  <td>1.40</td>
+                  <td>1.47</td>
+                </tr>
+                <tr>
+                  <td>MTE-SLAM (Ours)</td>
+                  <td>0.12</td>
+                  <td>0.32</td>
+                  <td>0.39</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="image-pair">
+          <figure class="exp-figure">
+            <img id="semantic-left" src="./images/语义重建.png" alt="Semantic reconstruction quality comparison." />
+            <figcaption>Semantic reconstruction quality comparison.</figcaption>
+          </figure>
+          <figure class="exp-figure">
+            <img id="semantic-right" src="./images/语义结果.png" alt="Semantic generated and residual comparison." />
+            <figcaption>Generated/residual semantic comparison against baseline.</figcaption>
+          </figure>
+        </div>
+
+        <h3>4. Ablation</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>MTFF</th>
+                <th>FRS</th>
+                <th>mIoU (%) ↑</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>w/o MTFF + w/o FRS</td>
+                <td>-</td>
+                <td>-</td>
+                <td>78.63</td>
+              </tr>
+              <tr>
+                <td>w/o MTFF</td>
+                <td>-</td>
+                <td>Yes</td>
+                <td>88.65</td>
+              </tr>
+              <tr>
+                <td>w/o FRS</td>
+                <td>Yes</td>
+                <td>-</td>
+                <td>82.16</td>
+              </tr>
+              <tr>
+                <td>MTE-SLAM (Ours)</td>
+                <td>Yes</td>
+                <td>Yes</td>
+                <td>90.21</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="citation" class="section panel reveal">
+        <h2>Citation</h2>
+        <div class="table-wrap">
+          <pre style="margin: 0; white-space: pre-wrap; color: #334155; font-size: 0.9rem"><code>@article{lu2026mteslam,
+  title   = {MTE-SLAM: Multi-Tier Feature Fusion for Efficient Neural Semantic SLAM},
+  author  = {Danqi Lu and Changxin Huang and Zhuangzhuang Chen and Zhiliang Lin and Dachong Li and Yanbin Chang and Jianqiang Li},
+  journal = {ICRA 2026},
+  year    = {2026}
+}</code></pre>
+        </div>
+      </section>
+
+      <footer class="foot">
+        Copyright 2026 MTE-SLAM Project Page | Built for paper presentation
+      </footer>
+    </main>
+    <script>
+      function syncSemanticImageHeight() {
+        const left = document.getElementById("semantic-left");
+        const right = document.getElementById("semantic-right");
+        if (!left || !right) return;
+        left.style.height = "";
+        const h = right.getBoundingClientRect().height;
+        if (h > 0) left.style.height = `${h}px`;
+      }
+
+      window.addEventListener("load", syncSemanticImageHeight);
+      window.addEventListener("resize", syncSemanticImageHeight);
+    </script>
+  </body>
+</html>
