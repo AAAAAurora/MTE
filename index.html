@@ -174,12 +174,11 @@
         text-align: center;
       }
 
-      .hero-video iframe {
+      .hero-video video {
         width: 100%;
         max-width: 100%;
-        aspect-ratio: 16 / 9;
         border-radius: 14px;
-        border: 0;
+        background: #ffffff;
         display: block;
         margin: 0 auto;
       }
@@ -210,6 +209,7 @@
         color: var(--text);
         text-decoration: none;
         font-weight: 600;
+        font-size: 1.1rem;
         background: #f8fafc;
         transition: transform 0.24s ease, border-color 0.24s ease;
         min-width: 98px;
@@ -233,8 +233,8 @@
       }
 
       .btn .icon svg {
-        width: 16px;
-        height: 16px;
+        width: 30px;
+        height: 30px;
         display: block;
       }
 
@@ -609,20 +609,18 @@
           <img src="./images/标志.png" alt="Institutional logo" />
         </div>
         <div class="hero-video">
-          <iframe
-            src="https://www.youtube.com/embed/-ZbpEO9BQeI"
-            title="MTE-SLAM Video"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerpolicy="strict-origin-when-cross-origin"
-            allowfullscreen
-          ></iframe>
+          <video controls playsinline webkit-playsinline muted preload="metadata">
+            <source src="./视频.mp4" type="video/mp4" />
+          </video>
         </div>
         <div class="actions">
           <a class="btn primary" href="#"
             ><span class="icon" aria-hidden="true"
               ><svg viewBox="0 0 24 24" fill="none">
-                <rect x="1.5" y="4.5" width="21" height="15" rx="3.5" stroke="#9CA3AF" stroke-width="1.5"></rect>
-                <text x="12" y="15" text-anchor="middle" font-size="8" font-weight="700" fill="#111827">arXiv</text>
+                <circle cx="12" cy="12" r="8.7" fill="#F2F2F2" stroke="#C9C9C9" stroke-width="1.2"></circle>
+                <path d="M16.6 6.4 8.4 17.6" stroke="#D6D1CD" stroke-width="2.2" stroke-linecap="round"></path>
+                <path d="M7.6 7.1 13.6 13.8" stroke="#BF1E24" stroke-width="2.6" stroke-linecap="round"></path>
+                <path d="M9.2 15.8 12.6 11.8" stroke="#BF1E24" stroke-width="2.2" stroke-linecap="round"></path>
               </svg></span
             >Paper</a
           >
@@ -634,6 +632,23 @@
                 ></path>
               </svg></span
             >Code</a
+          >
+          <a class="btn" href="https://youtu.be/-ZbpEO9BQeI" target="_blank" rel="noopener"
+            ><span class="icon" aria-hidden="true"
+              ><svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M23.5 7.2a3 3 0 0 0-2.1-2.12C19.52 4.5 12 4.5 12 4.5s-7.52 0-9.4.58A3 3 0 0 0 .5 7.2 31.3 31.3 0 0 0 0 12a31.3 31.3 0 0 0 .5 4.8 3 3 0 0 0 2.1 2.12C4.48 19.5 12 19.5 12 19.5s7.52 0 9.4-.58a3 3 0 0 0 2.1-2.12A31.3 31.3 0 0 0 24 12a31.3 31.3 0 0 0-.5-4.8ZM9.75 15.53V8.47L16 12l-6.25 3.53Z"
+                ></path>
+              </svg></span
+            >Video</a
+          >
+          <a class="btn" href="#"
+            ><span class="icon" aria-hidden="true"
+              ><svg viewBox="0 0 24 24" fill="none">
+                <rect x="4" y="3.5" width="16" height="17" rx="2.5" stroke="currentColor" stroke-width="1.5"></rect>
+                <path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+              </svg></span
+            >Poster</a
           >
         </div>
       </section>
