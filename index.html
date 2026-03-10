@@ -174,12 +174,12 @@
         text-align: center;
       }
 
-      .hero-video video {
+      .hero-video iframe {
         width: 100%;
         max-width: 100%;
-        height: auto;
+        aspect-ratio: 16 / 9;
         border-radius: 14px;
-        background: #ffffff;
+        border: 0;
         display: block;
         margin: 0 auto;
       }
@@ -609,9 +609,13 @@
           <img src="./images/标志.png" alt="Institutional logo" />
         </div>
         <div class="hero-video">
-          <video controls playsinline webkit-playsinline muted preload="metadata">
-            <source src="./视频.mp4" type="video/mp4" />
-          </video>
+          <iframe
+            src="https://www.youtube.com/embed/-ZbpEO9BQeI"
+            title="MTE-SLAM Video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen
+          ></iframe>
         </div>
         <div class="actions">
           <a class="btn primary" href="#"
