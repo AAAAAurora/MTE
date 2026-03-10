@@ -1,0 +1,923 @@
+
+===== PAGE 1 =====
+MTE-SLAM: Multi-Tier Feature Fusion for Efficient Neural Semantic
+SLAM
+Danqi Lu, Changxin Huang, Zhuangzhuang Chen, Zhiliang Lin, Dachong Li, Yanbin Chang, Jianqiang Li ∗
+Abstract— Neural implicit representations have demonstrated
+excellent performance in Simultaneous Localization and Map-
+ping (SLAM) by virtue of their ability to jointly model
+geometry, color and camera poses. Recent studies have at-
+tempted to integrate scene semantic information into implicit
+representation frameworks, significantly improving the ability
+of environmental understanding. Nevertheless, most existing
+methods rely on direct semantic coloring or rough fusing
+other modalities, resulting in underutilized semantic clues. This
+further causes problems such as blurred small objects, loss of
+fine structures and unclear regional boundaries. Additionally,
+redundant features introduced in the process reduce system
+efficiency. To address these challenges, we propose MTE-SLAM,
+an accurate and efficient end-to-end neural RGB-D semantic
+SLAM framework that synergizes Multi-Tier Feature Fusion
+(MTFF) and Feature Redundancy Suppressor (FRS). MTFF
+progressively fuses semantic features at global and local scales.
+The global context enhancement module captures scene-level
+semantic correlations, while the local continuity enhancement
+module refines neighborhood consistency, generating detailed
+and coherent semantic maps. FRS adaptively filters redundant
+features based on their importance and temporal variation,
+reducing parameters and computation while preserving repre-
+sentational power to accelerate training and inference. Compre-
+hensive evaluations on Replica and ScanNet demonstrate that
+MTE-SLAM achieves centimeter-level reconstruction, state-of-
+the-art tracking and semantic accuracy, and runs up to four
+times faster than existing semantic SLAM systems.
+I. INTRODUCTION
+Simultaneous Localization and Mapping (SLAM) enables
+autonomous agents to localize themselves while constructing
+maps of unknown environments, and is widely used in
+robotics [15], [20], augmented reality and autonomous driv-
+ing [12], [26]–[28]. Traditional SLAM methods, however,
+rely heavily on hand-crafted features and are sensitive to
+illumination changes, dynamic objects and complex scene
+geometries [2], [24], [32]. Neural Radiance Fields (NeRF)
+This work is supported in part by the National Natural Science Funds
+for Distinguished Young Scholar (No. 62325307), in part by the Na-
+tional Natural Science Foundation Major Scientific Research Instrument
+Development Project (No. 62527809), in part by the Shenzhen Key In-
+dustry R&D Program Project (No. ZDCY20250901102300001), in part
+by the National Natural Science Foundation of China (Nos. 62373257,
+62473264, 62203134, 62403325), in part by the Natural Science Foundation
+of Guangdong Province (Nos. 2023B1515120038, 2026A1515011532), in
+part by Shenzhen Science and Technology Innovation Commission (No.
+KJZD20230923113801004), in part by the Key-Area Research and Devel-
+opment Program of Guangdong Province (No. 2025B0909020002), and in
+part by the Open Project of State Key Laboratory of Synthetical Automation
+for Process Industries (No. SAPI-2025-KFKT-11). This work is supported
+by the Intelligent Computing Center of Shenzhen University.
+All authors are with the School of Artificial Intelligence and National
+Engineering Laboratory for Big Data System Computing Technology, Shen-
+zhen University, Shenzhen 518061, China.
+*Corresponding author: Jianqiang Li(lijq@szu.edu.cn)
+Better
+Better
+0 1 2 3 4 5 6 7 8 9
+SLAM. FPT (s) ↓
+0.3
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+1.0
+1.1
+1.2ATE RMSE (cm) ↓
+sem (with semantics)
+Co-SLAM
+Vox-Fusion
+Point-SLAM
+ESLAM
+w/o sem (no semantics)
+NIDS-SLAM
+DNS-SLAM
+SNI-SLAM
+Ours
+Fig. 1: MTE-SLAM delivers the best trajectory accuracy
+and offers the fastest runtime among semantic neural im-
+plicit SLAM methods, approaching the speed of leading
+non-semantic systems and achieving a balance between
+localisation precision and real-time performance. In addi-
+tion, MTE-SLAM produces cleaner and more consistent
+object-level semantic boundaries, exhibiting noticeably fewer
+semantic-segmentation errors than competing semantic base-
+lines.
+[16] represent 3D scenes using neural implicit functions, en-
+abling photorealistic view synthesis from sparse inputs.Their
+continuous spatial encoding supports high-fidelity surface
+reconstruction, making them well-suited for detailed, dense
+mapping [14]. Integrating NeRF into SLAM has led to neural
+implicit SLAM, where geometry and appearance are jointly
+optimized via neural networks. Recent research increasingly
+incorporates semantic understanding into implicit represen-
+tations to improve environmental comprehension and local-
+ization robustness [5]. Studies show that combining pre-
+trained semantic predictions with implicit function-based
+mapping, which is augmented by multi-view fusion, can
+jointly optimize geometry, appearance and semantics in 3D,
+resulting in dense structural reconstruction, compact repre-
+sentation and semantic consistency [4]. Semantic features
+are high-dimensional, strongly context-dependent and struc-
+turally complex. When semantic information is introduced
+into neural implicit SLAM systems, the need to process such
+high-dimensional and complex features often leads to a sig-
+nificant drop in overall runtime efficiency. In addition, most
+existing methods adopt relatively simple semantic processing
+strategies. For example, vMap [8] only embeds semantic
+information into object-level neural field representations but
+does not construct a semantic map; in NIDS-SLAM [5],
+semantic information is treated as RGB data and used for
+simple coloring; SNI-SLAM [31] introduces a joint mapping
+
+===== PAGE 2 =====
+mechanism of semantics and geometry, but its fusion strategy
+places multi-modal features side by side at a single scale,
+without explicitly considering the distribution differences of
+semantic features in the global context and local boundary
+continuity. As a result, although the generated maps contain
+some semantic labels, the overall system becomes slower,
+and the semantic details in the maps remain coarse and
+blurred. There is a pressing need for more fine-grained
+and efficient fusion strategies that can leverage semantic
+information without introducing prohibitive computational
+overhead.
+To address the aforementioned challenges, we propose
+a multi-tier semantic feature fusion mechanism that fully
+leverages semantic information across modalities and scales.
+Specifically, our approach integrates semantic features at
+both global and local levels: global semantic context is
+first used to enhance representations by capturing scene-
+level cues, while local refinement enforces spatial continuity
+through neighborhood consistency. This global-local fusion
+strategy ensures effective utilization of semantic informa-
+tion at both macro and micro levels, thereby significantly
+enriching the coherence and expressiveness of the resulting
+semantic maps. In parallel, we introduce a feature redun-
+dancy suppressor designed to perform dynamic compression
+and refinement of semantic features. This module adaptively
+identifies and discards less informative components based
+on feature importance and temporal variation, thus reducing
+redundancy. As a result, it curbs the growth of model
+complexity and mitigates the computational overhead associ-
+ated with iterative training, effectively preventing efficiency
+degradation due to unbounded complexity growth.
+Overall, our main contributions include:
+•We propose a multi-tier semantic feature fusion mecha-
+nism that enhances semantic representations by leverag-
+ing scene-level global context and enforcing continuity
+constraints within local spatiotemporal neighborhoods,
+thereby mitigating missing edge details and blurred
+semantic boundaries to improve reconstruction quality.
+•We utilize a feature redundancy suppressor that dynam-
+ically prunes redundant information based on feature
+importance and temporal variation, compressing feature
+representation while preserving semantic expressiveness
+to improve training efficiency and real-time perfor-
+mance.
+•Our method is validated on Replica [22] and Scan-
+Net [3], outperforming existing semantic SLAM ap-
+proaches in tracking, mapping, segmentation and real-
+time performance.
+II. RELATEDWORK
+a) Neural Implicit SLAM:Traditional feature-based
+SLAM [1], [17]–[19] depends on sparse handcrafted features
+and degrades in textureless or dynamic environments [10].
+Recent advances introduce neural implicit representations for
+dense, end-to-end scene modeling. DROID-SLAM [25] com-
+bines learned motion and depth estimation with dense bundle
+adjustment. iMAP [24] employs an MLP for unified, scene-
+specific representation in real-time tracking and mapping.
+NICE-SLAM [32] improves scalability and detail through
+hierarchical encoding and geometric priors. V ox-Fusion [30]
+adopts voxel partitioning with octree optimization for effi-
+cient reconstruction. Point-SLAM [21] anchors features on
+point clouds to support adaptive resolution. Co-SLAM [29]
+leverages multi-resolution hash grids and volumetric encod-
+ing for faster convergence and higher fidelity. ESLAM [7]
+incorporates neural radiance fields and multi-scale feature
+planes for efficient dense mapping. QQ-SLAM [6] addresses
+the optimization inefficiency in neural SLAM by introduc-
+ing quantized feature queries, facilitating faster convergence
+during per-frame optimization. However, it focuses only on
+compressing visual features without semantic information.
+In contrast, we achieve faster convergence during per-frame
+optimization, but we propose a semantic-aware compression
+strategy specifically for semantic information, enabling effi-
+cient and consistent semantic optimization at each frame.
+b) Semantic Neural Implicit SLAM:Despite progress
+in dense neural implicit SLAM, most methods emphasize
+geometric and visual reconstruction, lacking explicit seman-
+tic understanding. This limits their utility in downstream
+tasks like semantic navigation and object-level manipula-
+tion. Recent works integrate semantics into neural SLAM
+frameworks. vMap [8] presents an object-centric system
+modeling each object instance with a lightweight MLP,
+supporting online, watertight object-level mapping. NIDS-
+SLAM [5] combines classical SLAM pipelines with neural
+implicit networks to jointly learn geometry, appearance and
+semantics at scale. DNS-SLAM [11] enhances reconstruction
+and semantic coherence by incorporating 2D semantic priors
+and multi-view constraints. SNI-SLAM [31] introduces a
+hierarchical semantic representation with cross-modal feature
+collaboration, achieving robust mapping and tracking under
+occlusion or noise. However, it treats feature fusion as a
+single-stage process, lacking attention to fine-grained seman-
+tic consistency and boundary precision. To address this, we
+propose a multi-tier semantic fusion strategy: global fusion
+captures scene-level context for structural coherence, while
+local fusion refines neighborhood continuity to improve
+boundary sharpness and occlusion robustness.
+III. METHOD
+This section explains how to effectively leverage semantic
+information in neural implicit semantic SLAM to improve
+overall performance. First, a multi-tier feature fusion mech-
+anism enhances semantic representation by integrating global
+context and local spatiotemporal constraints, reducing bound-
+ary ambiguity and detail loss. Second, the feature redundancy
+suppressor and its working process are described. The overall
+pipeline of our method is shown in Fig. 2.
+A. Multi-Tier Feature Fusion
+In multimodal perception, geometric, semantic and ap-
+pearance features complement each other to enable accu-
+rate object understanding. Geometric features convey spatial
+
+===== PAGE 3 =====
++
+Fg
+Fs
+Fa
+Camera 
+Pose
+Finterp Ffused
+Sample 
+Ray Feature Loss
+Semantic Loss
+RGB Loss
+Depth Loss
+Feature 
+ExtractorSegmentation
+Head
++
+Re-rendering Loss
+Feature 
+Interpolation
+Coarse Fine
+SDF
+Semantic
+RGB
+Volumetric Renderer
+∫
+Input Features Output Features
+Update Update
+Feature Redundancy Suppressor
+Multi-Tier Feature Fusion
+RGBD Sensor Input
+Positional 
+Encoding
+LE CA
+CA
+Fig. 2: Overview of our MTE-SLAM framework. Our framework takes an RGB-D stream as input, samples 3D rays,
+and extracts multi-modal features via a feature extractor and segmentation head. Semantic features are projected into an
+updatable space and refined by the feature redundancy suppressor to remove redundant information. Appearance, geometry
+and semantic features are then fused through a multi-tier module for enhanced representation. This fused output, along with
+RGB-D images and segmentation results, provides supervision. Interpolated features are decoded to generate RGB, depth
+and semantic predictions, which combined with supervision signals, define the loss function. The entire system is jointly
+optimized to estimate camera poses and update a dense 3D map.
+structure, aiding localization and mapping. Semantic features
+provide category-level recognition, essential for task plan-
+ning and decision-making. Appearance features offer rich
+textures and visual details that support semantic reason-
+ing and enhance recognition. Fine textures help distinguish
+similar-looking regions, improving recognition accuracy and
+geometric reconstruction, while reducing redundant map-
+ping and registration errors. To harness the correlations and
+constraints among these features, we propose a hierarchi-
+cal multimodal fusion mechanism that integrates structural
+cues from geometry, relational context from semantics and
+detailed textures from appearance.
+a) Global Fusion:To fully exploit the complementarity
+among geometric, semantic and appearance features, we de-
+sign a two-stage cross-modal attention fusion mechanism. In
+the first stage, geometric features guide the enhancement of
+semantic features. The structural information from geometry
+helps highlight components of the semantic representation
+that are closely aligned with the scene’s physical layout,
+thereby improving the accuracy and reliability of the se-
+mantic encoding. In the second stage, semantic features are
+leveraged to refine appearance features. With the globally
+consistent context provided by semantics, the network can
+guide the appearance representation to focus on visual details
+that are coherent with semantic categories. This hierarchical
+fusion pipeline enables progressive information exchange
+from geometry to semantics and from semantics to appear-
+ance through cross-modal attention.
+We extract features from input RGB-D framesI=
+{Ri, Di}n
+i=1, representing geometric, semantic and appear-
+ance features as matricesG∈R N×C g,S∈R N×C s and
+A∈R N×C a, whereNis the number of feature elements and
+Cg,C s andC a are the feature dimensions of each modality.
+We project each modality to a shared embedding space of
+dimensiond:
+Q1 =W (1)
+Q G,K 1 =W (1)
+K S,V 1 =W (1)
+V A,(1)
+whereW (1)
+Q ∈R d×Cg,W (1)
+K ∈R d×Cs andW (1)
+V ∈R d×Ca
+as learnable projections. The fusion attention matrix is com-
+puted viaA (1) =softmax(Q 1K⊤
+1 /
+√
+d),yielding geometry-
+guided semantic features:
+Ts =A (1)V1 ∈R N×d .(2)
+We adopt a cross-modal attention fusion mechanism: ge-
+ometric features serve as queries (Q 1), semantic features
+as keys (K 1) and appearance features as values (V 1). The
+spatial structure in geometric features guides attention to
+consistent visual regions, suppressing noisy or irrelevant
+semantics and yielding more reliable semantic representation
+Ts. In the second stage, semantic featuresT s guide the
+refinement of appearance features. Specifically,T s serves as
+queries and appearance featuresAas both keys and values:
+Q2 =W (2)
+Q Ts,K 2 =W (2)
+K A,V 2 =W (2)
+V A,(3)
+whereW (2)
+Q , W (2)
+K , W (2)
+V are independently learned pro-
+jections. Attention weights are computed asA (2) =
+softmax(Q2K⊤
+2 /
+√
+d),and the enhanced appearance features
+are:
+Ta =A (2)V2 ∈R N×d .(4)
+This two-stage design enables progressive, modality-aware
+fusion: the first stage improves semantic features under
+
+===== PAGE 4 =====
+geometric constraints, while the second enriches appearance
+features using refined semantics without disrupting the es-
+tablished geometric-semantic structure.
+b) Local Fusion:Although global semantic and ap-
+pearance features are enhanced through cross-modal atten-
+tion fusion, the local structural details of semantic features
+may still remain ambiguous. Semantic features often suffer
+from oversmoothing near object boundaries. Then, we use
+a lightweight local modeling mechanism into the fusion
+module to further enhance the spatial resolution. By aggre-
+gating features within a local neighborhood to strengthen
+the semantic response around object boundaries and fine
+structures:
+T′
+s = Conv2 (σ(Conv 1 (Ts))),(5)
+whereConv 1 andConv 2 denote depthwise or lightweight
+convolutions, andσ(·)is a nonlinear activation function. To
+enhance local semantic features with clearer region bound-
+aries and finer structural details, we employ a depthwise-
+pointwise convolutional module defined as follows:
+S′ =σ
+
+Convdw
+3×3(Ts)
+
+, ˆS=σ
+
+Convpw
+3×3(S′)
+
+.(6)
+After processing through this module, we obtain the locally
+enhanced semantic feature ˆS, which exhibits clearer region
+boundaries and finer structural details. However, simply
+stacking the enhanced semantic, appearance, and geometric
+features may introduce errors due to inconsistencies across
+modalities, so we need a more adaptive feature integration
+strategy that can handle spatially varying modality reliability.
+Then, we design a dynamic gating fusion mechanism that
+adaptively integrates multi-modal features:
+[Γg(i),Γ s(i),Γ a(i)] =σ
+
+Wg ∗[G(i); ˆS(i);T a(i)]
+
+,(7)
+wherei= 1, . . . , N,W g denotes the convolution kernel
+weights used in the gating function, “∗” represents the
+convolution operation, “;” indicates channel-wise feature
+concatenation, andσis the sigmoid activation. The gating
+coefficientsΓ g(i),Γ s(i)andΓ a(i)correspond to the weights
+for geometric, semantic and appearance modalities at spatial
+locationi, and are constrained within the range[0,1]. To
+ensure that the total contribution of different modalities is
+appropriate, we normalize the output gating coefficients and
+ensure thatΓ g(i) + Γ s(i) + Γ a(i) = 1.This mechanism
+adaptively adjusts fusion weights across spatial locations. In
+areas with reliable semantics but weak visual cues, higher
+weights are assigned to the semantic modality to enhance
+category-level understanding. In texture-rich yet semantically
+ambiguous regions, appearance features are emphasized for
+fine detail. At structural boundaries, geometric features dom-
+inate to preserve spatial accuracy. Finally, the fused feature
+representation at each spatial location is computed as:
+Ff used(i) = Γg(i)G(i) + Γs(i) ˆS(i) + Γa(i)T a(i),(8)
+whereF f used(i)denotes the fused implicit feature represen-
+tation vector at spatial locationi. After the two stage cross-
+modal attention and local gated fusion, we obtain a unified
+multi-modal feature representation.
+B. Feature Redundancy Suppressor
+Most SLAM systems construct the semantic feature space
+statically, using a fixed set of semantic prototypes predefined
+at initialization for feature alignment, matching and map
+annotation [9]. As frames accumulate, redundant or similar
+semantic features often emerge, leading to high-dimensional
+redundancy that degrades computational efficiency, real-time
+performance and map accuracy. Therefore we propose a
+feature redundancy suppressor that adaptively adjusts the
+semantic feature space during operation. This module dy-
+namically compresses redundancy, restructures features, and
+enhances their discriminability and generalization by analyz-
+ing the temporal and spatial dynamics of the input data.
+a) Feature Space Initialization:At the early stage of
+training neural implicit SLAM systems, semantic features
+extracted by the network are often unstable, leading to
+spatiotemporal drift in semantic representations. To provide
+a reliable structural foundation, we introduce an explicit
+feature space for initialization. The key idea is to predefine
+a set of semantic prototype vectors, each corresponding to
+a semantic category, serving as stable references from the
+start of training. We initialize this space by sampling rep-
+resentative feature vectors from the initial training data. Let
+the scene containCsemantic categories; the initial feature
+space is defined asA (0) ={u (0)
+c }C
+c=1,whereu (0)
+c denotes
+the initial prototype for categoryc. To ensure diversity and
+coverage, we adopt a balanced sampling strategy that selects
+representative features from each category, ensuring every
+class is associated with at least one prototype.
+b) Semantic Feature Compression Mapping:As train-
+ing progresses, new semantic features are continuously ex-
+tracted from sensor data or the neural network. Directly
+incorporating these features into the map may result in jitter
+or drift in the semantic locations due to random noise or
+fluctuations in network weights. To ensure semantic consis-
+tency and mitigate drift in the feature space, we introduce
+a mechanism to robustly anchor each new feature to the
+existing semantic structure. Whenever a new semantic feature
+vectorf new
+j∗ is generated, we search for the most similar
+prototype vector in the current explicit feature spaceA
+to serve as its projection anchor. Specifically, we adopt
+a nearest-neighbor matching strategy: based on a distance
+metric, we compute the similarity betweenf new
+j∗ and all
+existing anchorsu j:
+j∗ = arg min
+j∈{1,...,|A|}
+∥f new
+j∗ −u j∥2.(9)
+The anchor pointu j∗ with the smallest distance is selected as
+the match, effectively performing vector quantization in fea-
+ture space, where anchors serve as centroids and features are
+assigned to their nearest prototypes. This nearest-neighbor
+mapping anchors new semantic information to stable refer-
+ences, preventing independent drift. The matched anchoru j∗
+participates in both training and inference. During training,
+it provides a supervisory signal that guides the network’s
+output toward the semantic prototype, stabilizing feature
+learning. At inference, it acts as a semantic representative,
+
+===== PAGE 5 =====
+enabling efficient prediction. For instance, when a known
+object is reobserved, its features likely match a stored anchor,
+instantly yielding the correct semantic label.
+We define a compression loss that penalizes the discrep-
+ancy between the input feature vector and its corresponding
+updated output. Specifically, the loss is defined as the squared
+ℓ2 norm between the original feature vectoru j and the
+reconstructed featuref new
+j∗ after compression:
+LC =
+f new
+j∗ −u j
+2
+2 ,(10)
+which encourages feature stability across the optimization
+process and helps retain semantic consistency. We define the
+overall loss as a weighted sum of the following components
+L=λ CLC +L sni , whereL sni is consistent with those
+used in SNI-SLAM [31], which provides comprehensive
+supervision signals across geometry, semantics, features and
+appearance. We assignλ C according to the optimization
+targets at different stages of training.
+c) Adaptive Feature Space Refinement:As training
+progresses and the network converges, the distribution of
+semantic features stabilizes, making the initial anchor vectors
+less representative. If kept static, these anchors may fail to
+reflect the fine-grained semantics learned later in training. To
+address this, we propose an adaptive refinement mechanism
+that updates anchor vectors throughout training, ensuring
+alignment with the evolving semantic feature space. This
+leads to a more representative and compact set of prototypes.
+The core idea is to incrementally update each anchor after
+successful feature matching using a weighted rule. For an
+input featuref new
+j∗ matched to anchoru j∗, the anchor is
+updated as:
+unew
+j∗ ←u old
+j∗ +β
+
+f new
+j∗ −u old
+j∗
+
+,(11)
+whereβis a small learning rate controlling the update
+magnitude, and which performs an exponential moving av-
+erage update of the anchor using the newly observed feature
+f new
+j∗ . As more new features are continuously mapped to
+the same anchor, the anchor vector gradually converges to
+the ”centroid” of these features. If we additionally let each
+anchor track the number of features it has matched, denoted
+asN j, and set the update weight asβ= 1/(N j + 1), the
+update becomes an incremental mean:
+u(t+1)
+j∗ = Nj∗
+Nj∗ + 1 ·u (t)
+j∗ + 1
+Nj∗ + 1 ·f new
+j∗ ,(12)
+which precisely computes the running average of all matched
+samples. In this way, each anchor progressively approximates
+the true feature mean of its associated semantic category,
+gradually refining the anchor set in feature space during
+training through this optimization process. The initial set
+A(0) evolves intoA (t), and eventually converges toA ∗, a
+sparse yet representative set of semantic prototypes. This
+compact set effectively captures the semantic patterns in
+the scene using a limited number of anchor vectors. This
+design greatly reduces storage and computational cost while
+maintaining semantic expressiveness. Since the number of
+anchors is much smaller than the total number of features,
+Method 0000 0059 0106 0207
+NICE-SLAM 8.64 12.25 8.09 5.59
+Co-SLAM 7.13 11.14 9.36 7.14
+QQ-SLAM 6.99 9.47 8.22 8.49
+ESLAM 7.30 8.50 7.50 5.70
+SNI-SLAM6.907.38 7.19 4.70
+Ours 8.507.10 6.84 4.53
+TABLE I: ATE RMSE (cm)↓in tracking on ScanNet.
+Method room0 room1 room2 office0 office1 office2 office3 office4
+NICE-SLAM 1.86 2.37 2.26 1.50 1.01 1.85 5.67 3.35
+Co-SLAM 0.72 0.85 1.02 0.69 0.56 2.12 1.62 0.87
+QQ-SLAM 0.58 1.16 0.87 0.52 0.48 1.74 1.12 0.73
+ESLAM 0.71 0.70 0.52 0.57 0.55 0.58 0.72 0.63
+SNI-SLAM0.500.55 0.450.330.410.320.62 0.47
+Ours 0.550.44 0.430.360.390.340.59 0.45
+TABLE II: ATE RMSE (cm)↓in tracking on Replica.
+loss computation and matching operate only on anchor
+vectors, improving training efficiency. At inference, semantic
+recognition is performed via nearest-neighbor search over the
+anchor set, avoiding costly per-pixel network inference.
+IV. EXPERIMENTS
+A. Experimental Setup
+a) Datasets:We evaluate our method on synthetic and
+real-world datasets with semantic annotations. Reconstruc-
+tion quality is quantitatively evaluated on 8 synthetic scenes
+from Replica [22]. Camera pose accuracy is quantitatively
+evaluated on both Replica [22] and ScanNet [3]. The ground-
+truth camera poses and semantic maps of Replica [22] are
+provided by simulation. The ground-truth camera poses of
+ScanNet [3] are obtained using BundleFusion.
+b) Evaluation Metrics:We adopt the culling strategy
+and evaluation protocol from Co-SLAM [29], using the
+reconstruction accuracy metrics Depth L1 (cm), Accuracy
+(cm), Completion (cm) and Completion Ratio (%) with a
+threshold of 5 cm to assess the performance of our SLAM
+system. To evaluate the camera pose, we use the average
+absolute trajectory error (ATE RMSE (cm) [23]). Semantic
+segmentation is evaluated with respect to mIoU (%) [13]met-
+ric.
+c) Baseline Methods:For SLAM performance, we
+compare our method with state-of-the-art NeRF-based dense
+visual SLAM methods NICE-SLAM [32], Co-SLAM [29],
+V ox-Fusion [30], Point-SLAM [21], ESLAM [7], QQS-
+LAM [6], vMap [8], NIDS-SLAM [5], DNS-SLAM [11] and
+SNI-SLAM [31].
+d) Implementation Details:All experiments are con-
+ducted using a NVIDIA RTX 4090 GPU. All reported
+results are averaged 5 runs to ensure reliability. We adopt a
+Truncated Signed Distance Function (TSDF) representation
+and perform volume fusion incrementally with camera poses
+optimized via photometric tracking. For Replica, the TSDF
+mesh resolution is 0.01 m, while for ScanNet it is 0.02 m for
+efficiency. Tracking is initialized with 2000 sampled pixels
+and optimized for 8 iterations on Replica and 30 iterations
+on ScanNet, with learning rates lr T = 0.002, lr R = 0.001
+for Replica and lr T = 0.0005, lr R = 0.0025for ScanNet.
+
+===== PAGE 6 =====
+Replica ScanNet
+SNI-SLAM
+ATE RMSE : 
+0.45 cm
+ATE RMSE : 0.0047 m
+ATE RMSE : 0.0036 m
+ATE RMSE : 0.0056 m
+ATE RMSE : 0.0054 m ATE RMSE : 0.0043 m
+ATE RMSE : 0.0134 m ATE RMSE : 0.0045 m
+ATE RMSE : 0.0042 m ATE RMSE : 0.0649 m
+ATE RMSE : 0.0735 m ATE RMSE : 0.0502 m
+ATE RMSE : 0.0454 m
+SNI-SLAMOurs
+Fig. 3: Qualitative Tracking on Replica and ScanNet.
+Ours
+office2
+room0
+SNI-SLAM
+Fig. 4: Qualitative RGB Reconstruction on Replica.
+Method Depth L1 (cm)↓Acc. (cm)↓Comp. (cm)↓Comp. Ratio(%)↑
+NICE-SLAM 3.53 2.85 3.00 89.33
+Co-SLAM 1.62 2.10 2.08 93.44
+QQ-SLAM 1.42 2.43 1.93 94.38
+ESLAM 1.180.971.05 98.60
+SNI-SLAM 0.77 1.94 1.69 96.62
+Ours0.161.060.99 99.23
+TABLE III: Quantitative Reconstruction Comparison on
+Replica.
+B. Tracking Evaluation
+Quantitative tracking results are shown in Tab. I and
+Tab. II. In most scenes, our method achieves lower errors
+in ATE RMSE, significantly improving trajectory accuracy.
+As shown in the qualitative comparison in Fig. 3, the
+camera trajectories generated by our method are smoother
+and exhibit less jitter compared to SNI-SLAM [31]. Stable
+and continuous tracking is maintained even under large-scale
+rapid motion or complex structural variations.
+C. Reconstruction Evaluation
+Quantitative and qualitative reconstruction results on the
+Replica [22] dataset are shown in Tab. III and Fig. 4.
+Our method achieves the lowest Depth L1 error, lowest
+completion error and highest completion ratio, indicating
+superior reconstruction fidelity and surface coverage. While
+ESLAM [7] slightly surpasses us in accuracy, our method
+offers a better trade-off between accuracy and completeness.
+Qualitative results further show clear improvements in local
+SNI-SLAMOurs
+room1room0
+Fig. 5: Qualitative Semantic Reconstruction on Replica.
+CVPR'24
+Ground Truth
+Semantic
+Ours
+Generated/Residual Generated/Residual
+SNI-SLAM
+Fig. 6: Qualitative Semantic Segmentation on Replica.
+Method room0 room1 room2 office0 office1 office2 office3 office4
+NIDS-SLAM 82.45 84.08 76.99 85.94 - - - -
+DNS-SLAM 88.32 84.90 81.20 84.66 - - - -
+SNI-SLAM88.4287.43 86.1687.6378.6386.4974.01 80.22
+Ours 86.7588.85 86.3186.4090.2184.7781.40 80.46
+TABLE IV: Semantic Segmentation mIoU(%)↑Comparison
+on Replica.
+continuity and geometric completeness. As shown in the Fig.
+4, in room0 scene, the reconstructed edges between walls
+and adjacent objects are smoother and more continuous. In
+office2 scene, the sofa exhibits finer geometric details and
+more coherent surface structure.
+
+===== PAGE 7 =====
+Ground Truth ResidualGenerated
+Semantic
+RGB 
+Depth
+ Ours
+w/o MTFF
+w/o FRS
+w/o MTFF + w/o FRS
+Fig. 7: Qualitative Ablation Study on Replica.
+Method Track. FPT(s)↓Map. FPT(s)↓SLAM. FPT(s)↓
+w/o sem
+NICE-SLAM 0.07 5.00 5.05
+V ox-Fusion 0.47 0.46 0.93
+Point-SLAM 0.85 9.85 10.26
+Co-SLAM 0.140.10 0.16
+ESLAM0.060.28 0.33
+sem
+vMAP 0.15 1.72 1.66
+DNS-SLAM 0.36 7.58 7.99
+SNI-SLAM 0.06 1.40 1.47
+Ours 0.12 0.32 0.39
+TABLE V: Runtime Comparison on Replica.
+D. Semantics Evaluation
+To evaluate the semantic segmentation performance of
+our method, Tab. IV reports the mIoU (%) results on the
+Replica [22] dataset across multiple indoor scenes. Our
+method achieves the best or highly competitive performance
+in most scenes. In the office1 scene, it attains an mIoU
+of 90.21%, surpassing the strongest baseline by more than
+11.5%. In room1 and office3, the scores of 88.85% and
+81.40% also outperform all other methods. Even in room0,
+where baseline methods perform well, our method maintains
+a high score of 86.75%, indicating strong robustness and
+consistency across environments. As shown in Fig. 5, the se-
+mantic reconstruction of the floor in room0 is more complete.
+In room1, large objects such as the door and sofa are well
+reconstructed in semantic structure. The continuity at the
+junction between the window and the wall in room0, together
+with the semantic details of the desk lamp, is handled more
+precisely. The vase in room1 also exhibits better detail
+preservation. These results demonstrate the advantage of
+our method in reconstructing small objects and structural
+boundaries with higher semantic fidelity. Fig. 6 presents qual-
+itative semantic segmentation results on the Replica dataset,
+Method MTFF FRS mIoU(%)↑
+w/o MTFF + w/o FRS 78.63
+w/o MTFF✓88.65
+w/o FRS✓82.16
+Ours✓ ✓90.21
+TABLE VI: Quantitative Ablation Study on Replica(office1).
+further highlighting the superiority of our method in semantic
+accuracy and structural fidelity. Compared with SNI-SLAM,
+our approach produces more accurate segmentation of fine-
+grained structures including door frames and TV edges, as
+well as small objects such as desk lamps and items on
+the desk, with clearer boundaries and improved semantic
+consistency.
+E. Runtime Analysis
+We compare our method with NeRF-SLAM approaches
+without semantic modeling and semantic NeRF-SLAM
+methods. As shown in the Tab. V , while our method is not the
+fastest among all NeRF-SLAM methods in terms of average
+per-frame processing time, it performs competitively within
+the category of semantic NeRF-SLAM approaches. Com-
+pared to the baselines, our method achieves faster mapping
+speed, thereby improving overall runtime efficiency.
+F . Ablation Study
+Tab. VI presents a series of experiments on the office1
+scene from the Replica dataset to validate the effectiveness
+of the multi-tier feature fusion mechanism and the feature
+redundancy suppressor in our method.
+a) Multi-Tier Feature Fusion (MTFF):After applying
+the multi-tier feature fusion module, the semantic segmen-
+tation results in Fig. 7 show more continuous, clearer door-
+frame edges and more complete, structurally accurate ceiling
+lights, highlighting the model’s improved ability to capture
+fine details and preserve spatial consistency in complex
+boundary regions.
+b) Feature Redundancy Suppressor (FRS):Both the
+quantitative results in Tab. VI and the qualitative comparisons
+in Fig. 6 consistently demonstrate a substantial improvement
+in segmentation accuracy when the Feature Redundancy
+Suppressor is incorporated, elevating the accuracy from
+78.63% to 82.16%. The ceiling light, previously prone to
+misclassification or fragmentation, is now correctly labeled,
+demonstrating the module’s effectiveness in refining details
+and reducing ambiguity in complex regions.
+V. CONCLUSION
+We propose MTE-SLAM, a novel semantic SLAM system
+that achieves both efficiency and high-fidelity scene under-
+standing. It introduces a multi-tier semantic fusion strategy
+and a dynamic feature redundancy suppression module to
+better exploit semantic cues, resolve structural ambiguity
+and reduce computational overhead. Extensive experiments
+demonstrate that MTE-SLAM consistently outperforms ex-
+isting methods in both tracking and mapping accuracy while
+significantly reducing runtime.
+
+===== PAGE 8 =====
+REFERENCES
+[1] Carlos Campos, Richard Elvira, Juan J. G ´omez Rodr´ıguez, Jos´e M. M.
+Montiel, and Juan D. Tard ´os. ORB-SLAM3: An accurate open-
+source library for visual, visual-inertial, and multimap SLAM.IEEE
+Transactions on Robotics, 37(6):1874–1890, 2021.
+[2] Chi-Ming Chung, Yang-Che Tseng, Ya-Ching Hsu, Xiang Qian Shi,
+Yun-Hung Hua, Jia-Fong Yeh, Wen-Chin Chen, Yi-Ting Chen, and
+Winston H. Hsu. Orbeez-SLAM: A real-time monocular visual SLAM
+with ORB features and nerf-realized mapping. InIEEE International
+Conference on Robotics and Automation, pages 9400–9406, London,
+UK, May–June 2023. IEEE.
+[3] Angela Dai, Angel X. Chang, Manolis Savva, Maciej Halber,
+Thomas A. Funkhouser, and Matthias Nießner. Scannet: Richly-
+annotated 3d reconstructions of indoor scenes. InIEEE Conference
+on Computer Vision and Pattern Recognition, pages 2432–2443. IEEE
+Computer Society, 2017.
+[4] Calvin Galagain, Martyna Poreba, and Franc ¸ois Goulette. Is semantic
+SLAM ready for embedded systems? a comparative survey.arXiv
+preprint, abs/2505.12384, May 2025.
+[5] Yasaman Haghighi, Suryansh Kumar, Jean-Philippe Thiran, and
+Luc Van Gool. Neural implicit dense semantic SLAM.arXiv preprint,
+abs/2304.14560, 2023.
+[6] Sijia Jiang, Jing Hua, and Zhizhong Han. Query quantized neural
+SLAM. In Toby Walsh, Julie Shah, and Zico Kolter, editors,Associa-
+tion for the Advancement of Artificial Intelligence, pages 4057–4065.
+AAAI Press, 2025.
+[7] Mohammad Mahdi Johari, Camilla Carta, and Franc ¸ois Fleuret. ES-
+LAM: Efficient dense SLAM system based on hybrid representation
+of signed distance fields. InIEEE/CVF Conference on Computer
+Vision and Pattern Recognition, pages 17408–17419, Vancouver, BC,
+Canada, June 2023. IEEE.
+[8] Xin Kong, Shikun Liu, Marwan Taher, and Andrew J. Davison. vmap:
+Vectorised object mapping for neural field SLAM. InIEEE/CVF
+Conference on Computer Vision and Pattern Recognition, pages 952–
+961, Vancouver, BC, Canada, June 2023. IEEE.
+[9] J. Li, Z. Chen, J. Chen, and Q. Lin. Diversity-sensitive generative
+adversarial network for terrain mapping under limited human inter-
+vention.IEEE Trans. Cybern., 51(12):6029–6040, 2021.
+[10] J. Li, Y . Zhang, Z. Chen, J. Wang, M. Fang, C. Luo, and H. Wang.
+A novel edge-enabled SLAM solution using projected depth image
+information.Neural Comput. Appl., 32(19):15369–15381, 2020.
+[11] Kunyi Li, Michael Niemeyer, Nassir Navab, and Federico Tombari.
+DNS-SLAM: Dense neural semantic-informed SLAM. InIEEE/RSJ
+International Conference on Intelligent Robots and Systems, pages
+7839–7846. IEEE, 2024.
+[12] Jiuming Liu, Guangming Wang, Zhe Liu, Chaokang Jiang, Marc
+Pollefeys, and Hesheng Wang. Regformer: An efficient projection-
+aware transformer network for large-scale point cloud registration. In
+IEEE/CVF International Conference on Computer Vision, pages 8417–
+8426. IEEE, 2023.
+[13] Jonathan Long, Evan Shelhamer, and Trevor Darrell. Fully con-
+volutional networks for semantic segmentation. InConference on
+Computer Vision and Pattern Recognition, pages 3431–3440. IEEE
+Computer Society, 2015.
+[14] Ricardo Martin-Brualla, Noha Radwan, Mehdi S. M. Sajjadi,
+Jonathan T. Barron, Alexey Dosovitskiy, and Daniel Duckworth. Nerf
+in the wild: Neural radiance fields for unconstrained photo collections.
+InIEEE Conference on Computer Vision and Pattern Recognition,
+pages 7210–7219. Computer Vision Foundation / IEEE, 2021.
+[15] John McCormac, Ankur Handa, Andrew J. Davison, and Stefan
+Leutenegger. Semanticfusion: Dense 3d semantic mapping with
+convolutional neural networks. InIEEE International Conference on
+Robotics and Automation, pages 4628–4635. IEEE, 2017.
+[16] Ben Mildenhall, Pratul P. Srinivasan, Matthew Tancik, Jonathan T.
+Barron, Ravi Ramamoorthi, and Ren Ng. Nerf: Representing scenes
+as neural radiance fields for view synthesis. In Andrea Vedaldi, Horst
+Bischof, Thomas Brox, and Jan-Michael Frahm, editors,Computer
+Vision European Conference, volume 12346 ofLecture Notes in
+Computer Science, pages 405–421. Springer, 2020.
+[17] Raul Mur-Artal, J. M. M. Montiel, and Juan D. Tard ´os. ORB-SLAM:
+A versatile and accurate monocular SLAM system.IEEE Transactions
+on Robotics, 31(5):1147–1163, 2015.
+[18] Raul Mur-Artal and Juan D. Tard ´os. ORB-SLAM2: An open-source
+SLAM system for monocular, stereo, and RGB-D cameras.IEEE
+Transactions on Robotics, 33(5):1255–1262, 2017.
+[19] Tong Qin, Peiliang Li, and Shaojie Shen. VINS-Mono: A robust and
+versatile monocular visual-inertial state estimator.IEEE Transactions
+on Robotics, 34(4):1004–1020, 2018.
+[20] Antoni Rosinol, Marcus Abate, Yun Chang, and Luca Carlone.
+Kimera: an open-source library for real-time metric-semantic local-
+ization and mapping. InIEEE International Conference on Robotics
+and Automation, pages 1689–1696. IEEE, 2020.
+[21] Erik Sandstr ¨om, Yue Li, Luc Van Gool, and Martin R. Oswald.
+Point-slam: Dense neural point cloud-based SLAM. InIEEE/CVF
+International Conference on Computer Vision, Paris, France, October
+1-6, 2023, pages 18387–18398. IEEE, 2023.
+[22] Julian Straub, Thomas Whelan, Lingni Ma, Yufan Chen, Erik Wij-
+mans, Simon Green, Jakob J. Engel, Raul Mur-Artal, Carl Yuheng Ren,
+Shobhit Verma, Anton Clarkson, Mingfei Yan, Brian Budge, Yajie Yan,
+Xiaqing Pan, June Yon, Yuyang Zou, Kimberly Leon, Nigel Carter,
+Jesus Briales, Tyler Gillingham, Elias Mueggler, Luis Pesqueira,
+Manolis Savva, Dhruv Batra, Hauke M. Strasdat, Renzo De Nardi,
+Michael Goesele, Steven Lovegrove, and Richard A. Newcombe. The
+Replica Dataset: A digital replica of indoor spaces.arXiv preprint,
+abs/1906.05797, 2019.
+[23] J ¨urgen Sturm, Nikolas Engelhard, Felix Endres, Wolfram Burgard, and
+Daniel Cremers. A benchmark for the evaluation of RGB-D SLAM
+systems. InIEEE/RSJ International Conference on Intelligent Robots
+and Systems, pages 573–580. IEEE, 2012.
+[24] Edgar Sucar, Shikun Liu, Joseph Ortiz, and Andrew J. Davison. imap:
+Implicit mapping and positioning in real-time. InIEEE/CVF Interna-
+tional Conference on Computer Vision, pages 6209–6218. IEEE, 2021.
+[25] Zachary Teed and Jia Deng. DROID-SLAM: deep visual SLAM for
+monocular, stereo, and RGB-D cameras. In Marc’Aurelio Ranzato,
+Alina Beygelzimer, Yann N. Dauphin, Percy Liang, and Jennifer Wort-
+man Vaughan, editors,Advances in Neural Information Processing
+Systems, pages 16558–16569, 2021.
+[26] Yulun Tian, Yun Chang, Fernando Herrera Arias, Carlos Nieto-
+Granda, Jonathan P. How, and Luca Carlone. Kimera-Multi: Robust,
+distributed, dense metric-semantic SLAM for multi-robot systems.
+IEEE Transactions on Robotics, 38(4):2022–2038, 2022.
+[27] Guangming Wang, Xinrui Wu, Shuyang Jiang, Zhe Liu, and Hesheng
+Wang. Efficient 3d deep lidar odometry.IEEE Transactions on Pattern
+Analysis and Machine Intelligence, 45(5):5749–5765, 2023.
+[28] Guangming Wang, Xinrui Wu, Zhe Liu, and Hesheng Wang. Hier-
+archical attention learning of scene flow in 3d point clouds.IEEE
+Transactions on Image Processing, 30:5168–5181, 2021.
+[29] Hengyi Wang, Jingwen Wang, and Lourdes Agapito. Co-SLAM:
+Joint coordinate and sparse parametric encodings for neural real-time
+SLAM. InIEEE/CVF Conference on Computer Vision and Pattern
+Recognition, pages 13293–13302, Vancouver, BC, Canada, June 2023.
+IEEE.
+[30] Xingrui Yang, Hai Li, Hongjia Zhai, Yuhang Ming, Yuqian Liu, and
+Guofeng Zhang. V ox-fusion: Dense tracking and mapping with voxel-
+based neural implicit representation. In Henry B. L. Duh, Ian Williams,
+Jens Grubert, J. Adam Jones, and Jianmin Zheng, editors,IEEE
+International Symposium on Mixed and Augmented Reality, pages
+499–507. IEEE, 2022.
+[31] Siting Zhu, Guangming Wang, Hermann Blum, Jiuming Liu, Liang
+Song, Marc Pollefeys, and Hesheng Wang. SNI-SLAM: Semantic
+neural implicit SLAM. InIEEE/CVF Conference on Computer Vision
+and Pattern Recognition, pages 21167–21177. IEEE, 2024.
+[32] Zihan Zhu, Songyou Peng, Viktor Larsson, Weiwei Xu, Hujun Bao,
+Zhaopeng Cui, Martin R. Oswald, and Marc Pollefeys. NICE-SLAM:
+neural implicit scalable encoding for SLAM. InIEEE/CVF Conference
+on Computer Vision and Pattern Recognition, pages 12776–12786.
+IEEE, 2022.
