@@ -449,6 +449,26 @@
         width: 100%;
       }
 
+      .closing-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 18px;
+        align-items: start;
+        margin-top: 10px;
+      }
+
+      .closing-panel h3,
+      .closing-panel h2 {
+        margin-top: 0;
+      }
+
+      .citation-box {
+        margin: 0;
+        white-space: pre-wrap;
+        color: #334155;
+        font-size: 0.9rem;
+      }
+
       .foot {
         margin: 28px 0 42px;
         padding: 16px;
@@ -508,7 +528,8 @@
           grid-template-columns: 1fr;
         }
         .table-pair,
-        .image-pair {
+        .image-pair,
+        .closing-grid {
           grid-template-columns: 1fr;
         }
         .hero-top {
@@ -944,56 +965,59 @@
           </figure>
         </div>
 
-        <h3>4. Ablation</h3>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Method</th>
-                <th>MTFF</th>
-                <th>FRS</th>
-                <th>mIoU (%) ↑</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>w/o MTFF + w/o FRS</td>
-                <td>-</td>
-                <td>-</td>
-                <td>78.63</td>
-              </tr>
-              <tr>
-                <td>w/o MTFF</td>
-                <td>-</td>
-                <td>Yes</td>
-                <td>88.65</td>
-              </tr>
-              <tr>
-                <td>w/o FRS</td>
-                <td>Yes</td>
-                <td>-</td>
-                <td>82.16</td>
-              </tr>
-              <tr>
-                <td>MTE-SLAM (Ours)</td>
-                <td>Yes</td>
-                <td>Yes</td>
-                <td>90.21</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section id="citation" class="section panel reveal">
-        <h2>Citation</h2>
-        <div class="table-wrap">
-          <pre style="margin: 0; white-space: pre-wrap; color: #334155; font-size: 0.9rem"><code>@article{lu2026mteslam,
+        <div class="closing-grid">
+          <div class="closing-panel">
+            <h3>4. Ablation</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Method</th>
+                    <th>MTFF</th>
+                    <th>FRS</th>
+                    <th>mIoU (%) ↑</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>w/o MTFF + w/o FRS</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>78.63</td>
+                  </tr>
+                  <tr>
+                    <td>w/o MTFF</td>
+                    <td>-</td>
+                    <td>Yes</td>
+                    <td>88.65</td>
+                  </tr>
+                  <tr>
+                    <td>w/o FRS</td>
+                    <td>Yes</td>
+                    <td>-</td>
+                    <td>82.16</td>
+                  </tr>
+                  <tr>
+                    <td>MTE-SLAM (Ours)</td>
+                    <td>Yes</td>
+                    <td>Yes</td>
+                    <td>90.21</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div id="citation" class="closing-panel">
+            <h2>Citation</h2>
+            <div class="table-wrap">
+              <pre class="citation-box"><code>@article{lu2026mteslam,
   title   = {MTE-SLAM: Multi-Tier Feature Fusion for Efficient Neural Semantic SLAM},
   author  = {Danqi Lu and Changxin Huang and Zhuangzhuang Chen and Zhiliang Lin and Dachong Li and Yanbin Chang and Jianqiang Li},
   journal = {ICRA 2026},
   year    = {2026}
 }</code></pre>
+            </div>
+          </div>
         </div>
       </section>
 
