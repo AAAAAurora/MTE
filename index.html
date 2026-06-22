@@ -94,6 +94,7 @@
       }
 
       .nav-inner {
+        position: relative;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -104,6 +105,21 @@
         letter-spacing: 0.08em;
         font-size: 0.84rem;
         color: var(--muted);
+      }
+
+      .nav-title {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #1d74d8;
+        background: linear-gradient(105deg, #2563eb, #0fbaa8);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 0.92rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        white-space: nowrap;
       }
 
       .menu {
@@ -239,6 +255,16 @@
         overflow-wrap: anywhere;
       }
 
+      .school-line a {
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.2s ease;
+      }
+
+      .school-line a:hover {
+        color: #1d74d8;
+      }
+
       .hero-video {
         margin-top: 12px;
         text-align: center;
@@ -280,33 +306,51 @@
         min-height: 44px;
         padding: 0 16px;
         border-radius: 10px;
-        border: 1px solid #d0d5dd;
+        border: 1px solid rgba(88, 167, 255, 0.32);
         color: var(--text);
         text-decoration: none;
         font-weight: 600;
         font-size: 1.1rem;
-        background: rgba(255, 255, 255, 0.84);
-        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
-        transition: transform 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease;
+        background: rgba(248, 251, 255, 0.92);
+        box-shadow: 0 6px 18px rgba(42, 95, 186, 0.06);
+        transition:
+          transform 0.22s ease,
+          color 0.22s ease,
+          background 0.22s ease,
+          border-color 0.22s ease,
+          box-shadow 0.22s ease;
         min-width: 98px;
       }
 
       .btn:hover {
-        transform: translateY(-3px);
-        border-color: rgba(88, 167, 255, 0.75);
-        box-shadow: 0 10px 24px rgba(42, 95, 186, 0.11);
+        transform: translateY(-4px) scale(1.025);
+        color: #165fa7;
+        border-color: rgba(88, 167, 255, 0.9);
+        background: linear-gradient(135deg, rgba(88, 167, 255, 0.14), rgba(77, 232, 213, 0.12));
+        box-shadow: 0 14px 30px rgba(42, 95, 186, 0.18);
       }
 
       .actions .btn.primary {
-        background: #f8fafc;
+        background: rgba(248, 251, 255, 0.92);
         color: var(--text);
-        border: 1px solid #d0d5dd;
+        border-color: rgba(88, 167, 255, 0.32);
+      }
+
+      .actions .btn.primary:hover {
+        color: #165fa7;
+        border-color: rgba(88, 167, 255, 0.9);
+        background: linear-gradient(135deg, rgba(88, 167, 255, 0.14), rgba(77, 232, 213, 0.12));
       }
 
       .btn .icon {
         margin-right: 8px;
         display: inline-flex;
         align-items: center;
+        transition: transform 0.22s ease;
+      }
+
+      .btn:hover .icon {
+        transform: scale(1.1);
       }
 
       .btn .icon svg {
@@ -393,17 +437,6 @@
         user-select: none;
       }
 
-      .title-motion-ready .section-title {
-        opacity: 0;
-        transform: translateY(14px);
-        transition: opacity 0.65s ease, transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
-      }
-
-      .title-motion-ready .section-title.is-visible {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
       .text {
         margin: 0;
         color: var(--muted);
@@ -466,9 +499,9 @@
 
       .exp-layout {
         display: grid;
-        grid-template-columns: 1.25fr 1fr;
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 0.43fr);
         gap: 12px;
-        align-items: start;
+        align-items: stretch;
         margin: 10px 0 18px;
       }
 
@@ -529,6 +562,10 @@
       .semantic-miou-table th:first-child,
       .semantic-miou-table td:first-child {
         min-width: 170px;
+        white-space: nowrap;
+      }
+
+      .semantic-miou-table th {
         white-space: nowrap;
       }
 
@@ -631,11 +668,18 @@
       }
 
       .recon-figure {
+        display: grid;
+        grid-template-rows: minmax(0, 1fr) auto;
+        min-height: 0;
         overflow: hidden;
         border-radius: 10px;
       }
 
       .recon-figure img {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        object-fit: contain;
         transform: scale(1.01);
         transform-origin: center;
       }
@@ -828,73 +872,6 @@
         transform: none;
       }
 
-      .motion-ready .card {
-        opacity: 0;
-        transform: translateY(18px);
-        transition:
-          opacity 0.6s ease var(--card-delay, 0ms),
-          transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) var(--card-delay, 0ms),
-          box-shadow 0.28s ease,
-          border-color 0.28s ease;
-      }
-
-      .motion-ready .card.is-visible {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      .motion-ready .card.is-visible:hover {
-        transform: translateY(-5px);
-      }
-
-      .motion-ready .actions .btn {
-        opacity: 0;
-        transform: translateY(14px);
-        transition:
-          opacity 0.52s ease var(--action-delay, 0ms),
-          transform 0.52s cubic-bezier(0.22, 1, 0.36, 1) var(--action-delay, 0ms),
-          border-color 0.24s ease,
-          box-shadow 0.24s ease;
-      }
-
-      .motion-ready .actions.is-visible .btn {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      .motion-ready .actions.is-visible .btn:hover {
-        transform: translateY(-3px);
-      }
-
-      .motion-ready .result-label-motion {
-        opacity: 0;
-        clip-path: inset(0 100% 0 0);
-        transform: translateX(-12px);
-        transition:
-          opacity 0.5s ease,
-          clip-path 0.65s cubic-bezier(0.22, 1, 0.36, 1),
-          transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
-      }
-
-      .motion-ready .result-label-motion.is-visible {
-        opacity: 1;
-        clip-path: inset(0);
-        transform: translateX(0);
-      }
-
-      .motion-ready .result-content-motion {
-        opacity: 0;
-        transform: translateY(16px);
-        transition:
-          opacity 0.62s ease var(--result-delay, 0ms),
-          transform 0.62s cubic-bezier(0.22, 1, 0.36, 1) var(--result-delay, 0ms);
-      }
-
-      .motion-ready .result-content-motion.is-visible {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
       .image-lightbox {
         position: fixed;
         z-index: 100;
@@ -940,32 +917,10 @@
       }
 
       @media (prefers-reduced-motion: reduce) {
-        .title-motion-ready .section-title {
-          opacity: 1;
-          transform: none;
-          transition: none;
-        }
-
-        .motion-ready .card {
-          opacity: 1;
-          transform: none;
-          transition: none;
-        }
-
-        .card:hover,
-        .motion-ready .card.is-visible:hover {
-          transform: none;
-        }
-
-        .motion-ready .actions .btn,
-        .motion-ready .actions.is-visible .btn,
-        .motion-ready .actions.is-visible .btn:hover,
-        .motion-ready .result-label-motion,
-        .motion-ready .result-label-motion.is-visible,
-        .motion-ready .result-content-motion,
-        .motion-ready .result-content-motion.is-visible {
-          opacity: 1;
-          clip-path: none;
+        .btn,
+        .btn:hover,
+        .btn .icon,
+        .btn:hover .icon {
           transform: none;
           transition: none;
         }
@@ -1007,6 +962,14 @@
         }
         .exp-layout {
           grid-template-columns: 1fr;
+        }
+
+        .recon-figure {
+          display: block;
+        }
+
+        .recon-figure img {
+          height: auto;
         }
         .table-pair,
         .image-pair,
@@ -1110,6 +1073,7 @@
     <header class="nav">
       <div class="container nav-inner">
         <div class="logo">ICRA 2026 | PROJECT PAGE</div>
+        <div class="nav-title">MTE-SLAM</div>
         <nav class="menu">
           <a href="#overview">Overview</a>
           <a href="#method">Method</a>
@@ -1135,7 +1099,11 @@
         </div>
         <p class="meta">
           <span class="authors-line">Danqi Lu, Changxin Huang, Zhuangzhuang Chen, Zhiliang Lin, Dachong Li, Yanbin Chang, Jianqiang Li*</span>
-          <span class="school-line">School of Artificial Intelligence and National Engineering Laboratory for Big Data System Computing Technology, Shenzhen University</span>
+          <span class="school-line"
+            ><a href="https://ai.szu.edu.cn/index.htm" target="_blank" rel="noopener">School of Artificial Intelligence</a> and
+            <a href="https://bdsc.szu.edu.cn/" target="_blank" rel="noopener">National Engineering Laboratory for Big Data System Computing Technology</a>,
+            <a href="https://en.szu.edu.cn/" target="_blank" rel="noopener">Shenzhen University</a></span
+          >
         </p>
         <div class="hero-logo">
           <img src="./images/标志.png" alt="Institutional logo" />
@@ -1231,9 +1199,9 @@
               </div>
             </div>
             <p>
-              MTFF performs <strong>hierarchical semantic aggregation</strong> in two stages. The <strong>global context branch</strong> models long-range scene
-              dependencies to stabilize category-level consistency, while the <strong>local continuity branch</strong> strengthens neighborhood-level
-              boundary alignment. Their collaborative fusion improves <strong>small-object integrity, edge sharpness, and regional coherence</strong>
+              MTFF performs hierarchical semantic aggregation in two stages. The global context branch models long-range scene
+              dependencies to stabilize category-level consistency, while the local continuity branch strengthens neighborhood-level
+              boundary alignment. Their collaborative fusion improves small-object integrity, edge sharpness, and regional coherence
               under occlusion and fast viewpoint changes.
             </p>
           </article>
@@ -1251,9 +1219,9 @@
               </div>
             </div>
             <p>
-              FRS <strong>adaptively suppresses low-value semantic channels</strong> based on feature importance and temporal variation. Instead of
-              uniformly keeping all activations, it retains only <strong>informative components</strong> for mapping updates, reducing redundant
-              computation and memory cost. This keeps semantic expressiveness while significantly improving <strong>frame-wise efficiency</strong>.
+              FRS adaptively suppresses low-value semantic channels based on feature importance and temporal variation. Instead of
+              uniformly keeping all activations, it retains only informative components for mapping updates, reducing redundant
+              computation and memory cost. This keeps semantic expressiveness while significantly improving frame-wise efficiency.
             </p>
           </article>
         </div>
@@ -1623,96 +1591,6 @@
       <img class="lightbox-image" alt="" />
     </div>
     <script>
-      document.documentElement.classList.add("title-motion-ready", "motion-ready");
-
-      const sectionTitles = document.querySelectorAll(".section-title");
-      if ("IntersectionObserver" in window) {
-        const titleObserver = new IntersectionObserver(
-          (entries, observer) => {
-            entries.forEach((entry) => {
-              if (!entry.isIntersecting) return;
-              entry.target.classList.add("is-visible");
-              observer.unobserve(entry.target);
-            });
-          },
-          { threshold: 0.35 }
-        );
-
-        sectionTitles.forEach((title) => titleObserver.observe(title));
-      } else {
-        sectionTitles.forEach((title) => title.classList.add("is-visible"));
-      }
-
-      const methodCards = document.querySelectorAll(".card");
-      methodCards.forEach((card, index) => {
-        card.style.setProperty("--card-delay", `${index * 110}ms`);
-      });
-
-      if ("IntersectionObserver" in window) {
-        const cardObserver = new IntersectionObserver(
-          (entries, observer) => {
-            entries.forEach((entry) => {
-              if (!entry.isIntersecting) return;
-              entry.target.classList.add("is-visible");
-              observer.unobserve(entry.target);
-            });
-          },
-          { threshold: 0.22 }
-        );
-        methodCards.forEach((card) => cardObserver.observe(card));
-      } else {
-        methodCards.forEach((card) => card.classList.add("is-visible"));
-      }
-
-      const heroActions = document.querySelector(".actions");
-      const actionButtons = document.querySelectorAll(".actions .btn");
-      actionButtons.forEach((button, index) => {
-        button.style.setProperty("--action-delay", `${index * 85}ms`);
-      });
-      window.requestAnimationFrame(() => {
-        window.requestAnimationFrame(() => heroActions?.classList.add("is-visible"));
-      });
-
-      const resultLabels = document.querySelectorAll("#results > h3, #results .ablation-content > h3");
-      resultLabels.forEach((label) => label.classList.add("result-label-motion"));
-
-      const resultContent = document.querySelectorAll(
-        "#results > .table-wrap, #results > .exp-figure, #results .exp-layout > *, #results .table-pair > *, #results .image-pair > *, #results .ablation-layout > *"
-      );
-      resultContent.forEach((item, index) => {
-        item.classList.add("result-content-motion");
-        item.style.setProperty("--result-delay", `${(index % 2) * 85}ms`);
-      });
-
-      if ("IntersectionObserver" in window) {
-        const resultObserver = new IntersectionObserver(
-          (entries, observer) => {
-            entries.forEach((entry) => {
-              if (!entry.isIntersecting) return;
-              entry.target.classList.add("is-visible");
-              observer.unobserve(entry.target);
-            });
-          },
-          { threshold: 0, rootMargin: "0px 0px 80px 0px" }
-        );
-        resultLabels.forEach((label) => resultObserver.observe(label));
-        resultContent.forEach((item) => resultObserver.observe(item));
-      } else {
-        resultLabels.forEach((label) => label.classList.add("is-visible"));
-        resultContent.forEach((item) => item.classList.add("is-visible"));
-      }
-
-      function revealVisibleResults() {
-        [...resultLabels, ...resultContent].forEach((item) => {
-          const rect = item.getBoundingClientRect();
-          if (rect.top < window.innerHeight * 0.96 && rect.bottom > 0) item.classList.add("is-visible");
-        });
-      }
-
-      revealVisibleResults();
-      window.addEventListener("scroll", revealVisibleResults, { passive: true });
-      window.addEventListener("resize", revealVisibleResults);
-
       const progressBar = document.querySelector(".scroll-progress");
       const navLinks = [...document.querySelectorAll(".menu a[href^='#']")];
       const navSections = navLinks
@@ -1850,11 +1728,23 @@
         if (h > 0) figure.style.height = `${h}px`;
       }
 
+      function syncReconstructionHeight() {
+        const table = document.querySelector(".exp-layout > .table-wrap");
+        const figure = document.querySelector(".recon-figure");
+        if (!table || !figure) return;
+        figure.style.height = "";
+        if (window.matchMedia("(max-width: 980px)").matches) return;
+        const h = table.getBoundingClientRect().height;
+        if (h > 0) figure.style.height = `${h}px`;
+      }
+
       window.addEventListener("load", syncSemanticImageHeight);
       window.addEventListener("load", syncAblationHeight);
+      window.addEventListener("load", syncReconstructionHeight);
       window.addEventListener("resize", () => {
         syncSemanticImageHeight();
         syncAblationHeight();
+        syncReconstructionHeight();
       });
     </script>
   </body>
